@@ -22,11 +22,7 @@ client.on("message", (message) => {
     	if(command === 'ping')
     	{
     		message.channel.send('pong');
-    	}
-    	else if(command === 'penis')
-    	{
-    		message.channel.send('vagina');
-    	}
+    	}    	
     	else if(command === 'e')
     	{
     		// Works for custom emojis, but not prebuilt emojis

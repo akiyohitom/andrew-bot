@@ -1,8 +1,9 @@
 // Declarations
 const Discord 	= require ("discord.js");
-const config 	= require('./config.json');
-const client 	= new Discord.Client(); // this is the server
-
+const config 	= require('./config.json');    
+const https     = require('https');
+const fs        = require('fs');                // FileSystem
+const client 	= new Discord.Client();         // Server
 
 // Startup
 client.on("ready", () => {
@@ -33,18 +34,30 @@ client.on("message", (message) => {
     		 
     		if(args[0])
     		{
-    			let imagelink = args[0];
-    			console.log("image: " + imagelink);
 
-    			var imagesplit = imagelink.split(':');
-    			var imagecode = imagesplit[2].substring(0, imagesplit[2].length-1);
+    			let image = args[0];
+    			console.log("image: " + image);
 
+    			var imagecode = image.match( /:(\d+)>/igu)[0];
+                var imagecode = imagecode.substring(1, imagecode.length-1);
     			console.log("image: " + imagecode);
 
-    			var newimagelink = imagecode + ".png";
-    			var link = config.imagelink + newimagelink;
-    			var embed = new Discord.RichEmbed().attachFile(link);
-    			message.channel.send({embed});
+                var emoji = client.emojis.get(imagecode);
+                console.log("emoji: " + emoji.url);
+
+                // Get filetype
+                var filetype = emoji.url.match(/\.[a-z]*$/igu)[0];
+                console.log("filetype: " + filetype);
+
+    			var filename = imagecode + filetype;
+    			var imagelink = emoji.url;//config.imagelink + filename;
+
+                console.log("fulllink: " + imagelink);
+
+                _download(imagelink, './image' + filetype, function() {
+                    message.channel.send({files: ['./image' + filetype]});
+                });
+    			 
     		} else {
     			message.reply("Missing image parameter.");	
     		}
@@ -53,3 +66,25 @@ client.on("message", (message) => {
 });
 
 client.login(config.token);
+
+// helper functions
+function _download(url, dest, callback) {
+    var file = fs.createWriteStream(dest)
+    https.get(url, function(response) {
+        response.pipe(file);
+        file.on('finish', function() {
+            file.close(callback());   
+        });
+    }).on('error', function(err) {
+        fs.unlink(dest);
+        if(callback) callback(err.message)
+    });
+};
+
+function _unicodeToChar(text) {
+   return text.replace(/\\u[\dA-F]{4}/gi, 
+          function (match) {
+               return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+          });
+};
+

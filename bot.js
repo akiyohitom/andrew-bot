@@ -3,6 +3,7 @@
 TODO
 - Print multiple images (parse and print all in same image)
 - Separate into files eventually
+- Clean up code and follow good js coding conventions
 */
 
 // Declarations
@@ -36,7 +37,7 @@ client.on("message", (message) => {
     var sender = message.author.username;
     if(!message.author.bot) console.log(sender + " has sent message: ( " + message + " )");
 
-	if(message.content.indexOf(config.prefix) === 0 || message.content.indexOf(config.testprefix) === 0 && !message.author.bot)
+	if((message.content.indexOf(config.prefix) === 0 || message.content.indexOf(config.testprefix) === 0) && !message.author.bot)
 	{  
         var testflag = (message.content.charAt(0) == config.testprefix);
 	    var args     = message.content.slice(config.prefix.length).trim().split(/ +/g);
